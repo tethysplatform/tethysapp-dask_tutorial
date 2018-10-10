@@ -3,18 +3,23 @@ import dask
 
 
 def inc(x):
-    time.sleep(30)
+    time.sleep(2)
     return x + 1
 
 
 def double(x):
-    time.sleep(30)
+    time.sleep(3)
     return x + 2
 
 
 def add(x, y):
-    time.sleep(30)
+    time.sleep(1)
     return x + y
+
+
+def sum_up(x):
+    time.sleep(5)
+    return sum(x)
 
 
 def total():
@@ -24,4 +29,4 @@ def total():
         b = dask.delayed(double, pure=False)(x)
         c = dask.delayed(add, pure=False)(a, b)
         output.append(c)
-    return dask.delayed(sum, pure=False)(output)
+    return dask.delayed(sum_up, pure=False)(output)
