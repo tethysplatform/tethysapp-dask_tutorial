@@ -36,10 +36,9 @@ class DaskTutorial(TethysAppBase):
             ),
             UrlMap(
                 name='result',
-                url='dask-tutorial/dask/result/{id}',
+                url='dask-tutorial/dask/show_result',
                 controller='dask_tutorial.controllers.show_result'
             ),
         )
-
 
         return url_maps

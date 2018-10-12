@@ -10,7 +10,7 @@ from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
 from tethysapp.dask_tutorial.job_functions import total
-
+from django.http.response import HttpResponseRedirect
 
 @login_required()
 def home(request):
@@ -56,8 +56,12 @@ def run_job(request):
         client = Client('10.0.2.15:8786')
         pass
 
-    jobs = DaskJob.objects.filter(label='test_dask').order_by('id')
+    return HttpResponseRedirect('../show_result')
 
+
+@login_required()
+def show_result(request):
+    jobs = DaskJob.objects.filter().order_by('-id')
     # Table View
     jobs_table_options = JobsTable(
         jobs=jobs,
@@ -74,17 +78,4 @@ def run_job(request):
 
     context = {'jobs_table': jobs_table_options}
 
-    # context = {
-    #     'task_key': delayed_dask.key,
-    #     'task_result': delayed_dask.result()
-    # }
-
     return render(request, 'dask_tutorial/jobs_table.html', context)
-
-
-@login_required()
-def show_result(request, id):
-    job = DaskJob.objects.get(id=id)
-    context = {'result': job.result, 'key': job.key}
-
-    return render(request, 'dask_tutorial/results.html', context)
