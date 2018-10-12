@@ -82,6 +82,7 @@ def jobs_table(request):
         striped=False,
         bordered=False,
         condensed=False,
+        results_url='dask_tutorial:result',
         # results_url='gizmos:results',
         refresh_interval=1000,
         delete_btn=True,
@@ -94,11 +95,11 @@ def jobs_table(request):
 
 
 @login_required()
-def result(request, id):
-    job = DaskJob.objects.get(id=id)
+def result(request, job_id):
+    job = DaskJob.objects.get(id=job_id)
 
     # Get result and Key
-    job_result = job.result
+    job_result = job.result()
     key = job.key
     context = {'result': job_result, 'key': key}
 
