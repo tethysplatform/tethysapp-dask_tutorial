@@ -12,6 +12,7 @@ from tethys_sdk.gizmos import JobsTable
 from tethysapp.dask_tutorial.job_functions import total
 from django.http.response import HttpResponseRedirect
 
+
 @login_required()
 def home(request):
     """
@@ -28,8 +29,19 @@ def home(request):
         href=reverse('dask_tutorial:run-dask')
     )
 
+    jobs_button = Button(
+        display_text='Show All Jobs',
+        name='dask_button',
+        attributes={
+            'data-toggle':'tooltip',
+            'data-placement':'top',
+        },
+        href=reverse('dask_tutorial:jobs-table')
+    )
+
     context = {
-        'dask_button': dask_button
+        'dask_button': dask_button,
+        'jobs_button': jobs_button,
     }
 
     return render(request, 'dask_tutorial/home.html', context)
@@ -56,11 +68,11 @@ def run_job(request):
         client = Client('10.0.2.15:8786')
         pass
 
-    return HttpResponseRedirect('../show_result')
+    return HttpResponseRedirect('../jobs_table')
 
 
 @login_required()
-def show_result(request):
+def jobs_table(request):
     jobs = DaskJob.objects.filter().order_by('-id')
     # Table View
     jobs_table_options = JobsTable(
@@ -70,7 +82,7 @@ def show_result(request):
         striped=False,
         bordered=False,
         condensed=False,
-        results_url='gizmos:results',
+        # results_url='gizmos:results',
         refresh_interval=1000,
         delete_btn=True,
         show_detailed_status=False,
@@ -79,3 +91,15 @@ def show_result(request):
     context = {'jobs_table': jobs_table_options}
 
     return render(request, 'dask_tutorial/jobs_table.html', context)
+
+
+@login_required()
+def result(request, id):
+    job = DaskJob.objects.get(id=id)
+
+    # Get result and Key
+    job_result = job.result
+    key = job.key
+    context = {'result': job_result, 'key': key}
+
+    return render(request, 'dask_tutorial/results.html', context)

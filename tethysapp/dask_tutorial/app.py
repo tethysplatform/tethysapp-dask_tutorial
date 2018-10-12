@@ -1,6 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
 
-
 class DaskTutorial(TethysAppBase):
     """
     Tethys app class for Dask Tutorial.
@@ -35,9 +34,14 @@ class DaskTutorial(TethysAppBase):
                 controller='dask_tutorial.controllers.run_job'
             ),
             UrlMap(
+                name='jobs-table',
+                url='dask-tutorial/dask/jobs_table',
+                controller='dask_tutorial.controllers.jobs_table'
+            ),
+            UrlMap(
                 name='result',
-                url='dask-tutorial/dask/show_result',
-                controller='dask_tutorial.controllers.show_result'
+                url='dask-tutorial/dask/result/{job_id}',
+                controller='dask_tutorial.controllers.result'
             ),
         )
 
