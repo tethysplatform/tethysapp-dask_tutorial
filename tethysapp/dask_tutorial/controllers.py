@@ -9,7 +9,7 @@ from dask.distributed import Client, as_completed
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
-from tethysapp.dask_tutorial.job_functions import total
+from tethysapp.dask_tutorial.job_functions import total, total_future
 from django.http.response import HttpResponseRedirect
 
 
@@ -18,29 +18,41 @@ def home(request):
     """
     Controller for the app home page.
     """
-    dask_button = Button(
-        display_text='Dask Job',
-        name='dask_button',
+    dask_delayed_button = Button(
+        display_text='Dask Delayed Job',
+        name='dask_delayed_button',
         attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Next'
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Next'
         },
-        href=reverse('dask_tutorial:run-dask')
+        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'delayed'})
+    )
+
+    dask_future_button = Button(
+        display_text='Dask Future Job',
+        name='dask_future_button',
+        attributes={
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Next'
+        },
+        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'future'})
     )
 
     jobs_button = Button(
         display_text='Show All Jobs',
         name='dask_button',
         attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
         },
         href=reverse('dask_tutorial:jobs-table')
     )
 
     context = {
-        'dask_button': dask_button,
+        'dask_delayed_button': dask_delayed_button,
+        'dask_future_button': dask_future_button,
         'jobs_button': jobs_button,
     }
 
@@ -48,27 +60,34 @@ def home(request):
 
 
 @login_required()
-def run_job(request):
+def run_job(request, status):
     """
     Controller for the app home page.
     """
-    status = 'delayed'
+
+    if status:
+        scheduler = get_scheduler(name='test_scheduler')
+        dask = DaskJob(name='test_dask_job', user=request.user, label='test_dask', scheduler=scheduler)
+
     if status.lower() == 'delayed':
         # Create dask delayed object
         delayed_job = total()
 
-        # Create Dask Job
-        # scheduler = DaskScheduler(name='test_scheduler', host='tcp://192.168.99.198:8786')
-        # scheduler.save()
-        scheduler = get_scheduler(name='test_scheduler')
-        delayed_dask = DaskJob(name='test_dask_job', user=request.user, label='test_dask', scheduler=scheduler)
-        delayed_dask.execute(delayed_job)
+        # Execute future
+        dask.execute(delayed_job)
 
-    else:
-        client = Client('10.0.2.15:8786')
-        pass
+    elif status.lower() == 'future':
 
-    return HttpResponseRedirect('../jobs_table')
+        # Get the client to create future
+        client = Client(scheduler.host)
+
+        # Create future
+        future_job = client.submit(total_future)
+        import pdb; pdb.set_trace()
+        # Execute future
+        dask.execute(future_job)
+
+    return HttpResponseRedirect(reverse('dask_tutorial:jobs-table'))
 
 
 @login_required()

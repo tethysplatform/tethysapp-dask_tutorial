@@ -30,7 +30,7 @@ class DaskTutorial(TethysAppBase):
             ),
             UrlMap(
                 name='run-dask',
-                url='dask-tutorial/dask/add',
+                url='dask-tutorial/dask/add/{status}',
                 controller='dask_tutorial.controllers.run_job'
             ),
             UrlMap(

@@ -22,6 +22,7 @@ def sum_up(x):
     return sum(x)
 
 
+# Delayed
 def total():
     output = []
     for x in range(3):
@@ -30,3 +31,14 @@ def total():
         c = dask.delayed(add, pure=False)(a, b)
         output.append(c)
     return dask.delayed(sum_up, pure=False)(output)
+
+
+# Future
+def total_future():
+    output = []
+    for x in range(3):
+        a = inc(x)
+        b = double(x)
+        c = add(a, b)
+        output.append(c)
+    return sum_up(output)
