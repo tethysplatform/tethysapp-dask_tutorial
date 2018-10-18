@@ -83,10 +83,9 @@ def jobs_table(request):
         bordered=False,
         condensed=False,
         results_url='dask_tutorial:result',
-        # results_url='gizmos:results',
         refresh_interval=1000,
         delete_btn=True,
-        show_detailed_status=False,
+        show_detailed_status=True,
     )
 
     context = {'jobs_table': jobs_table_options}
