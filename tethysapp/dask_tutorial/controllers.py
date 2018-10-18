@@ -2,14 +2,11 @@ from django.shortcuts import render, reverse
 from django.contrib.auth.decorators import login_required
 from tethys_sdk.gizmos import Button
 
-import time
-import dask
-import uuid
-from dask.distributed import Client, as_completed
+from dask.distributed import Client
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
-from tethysapp.dask_tutorial.job_functions import total, total_future
+from tethysapp.dask_tutorial.job_functions import total, total_future, rando
 from django.http.response import HttpResponseRedirect
 
 
@@ -24,7 +21,7 @@ def home(request):
         attributes={
             'data-toggle': 'tooltip',
             'data-placement': 'top',
-            'title': 'Next'
+            'title': 'Dask Delayed Job'
         },
         href=reverse('dask_tutorial:run-dask', kwargs={'status': 'delayed'})
     )
@@ -35,7 +32,7 @@ def home(request):
         attributes={
             'data-toggle': 'tooltip',
             'data-placement': 'top',
-            'title': 'Next'
+            'title': 'Dask Future Job'
         },
         href=reverse('dask_tutorial:run-dask', kwargs={'status': 'future'})
     )
@@ -46,6 +43,7 @@ def home(request):
         attributes={
             'data-toggle': 'tooltip',
             'data-placement': 'top',
+            'title': 'Show All Jobs'
         },
         href=reverse('dask_tutorial:jobs-table')
     )
@@ -64,7 +62,6 @@ def run_job(request, status):
     """
     Controller for the app home page.
     """
-
     if status:
         scheduler = get_scheduler(name='test_scheduler')
         dask = DaskJob(name='test_dask_job', user=request.user, label='test_dask', scheduler=scheduler)
@@ -80,10 +77,8 @@ def run_job(request, status):
 
         # Get the client to create future
         client = Client(scheduler.host)
-
         # Create future
-        future_job = client.submit(total_future)
-        import pdb; pdb.set_trace()
+        future_job = client.submit(rando, 15, pure=False)
         # Execute future
         dask.execute(future_job)
 
@@ -107,7 +102,18 @@ def jobs_table(request):
         show_detailed_status=True,
     )
 
-    context = {'jobs_table': jobs_table_options}
+    home_button = Button(
+        display_text='Home',
+        name='home_button',
+        attributes={
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Home'
+        },
+        href=reverse('dask_tutorial:home')
+    )
+
+    context = {'jobs_table': jobs_table_options, 'home_button': home_button}
 
     return render(request, 'dask_tutorial/jobs_table.html', context)
 

@@ -3,8 +3,6 @@
 
 {% load tethys_gizmos %}
 
-{% block title %}- Gizmos - Map View{% endblock %}
-
 {% block global_scripts %}
     {{ block.super }}
     {% gizmo_dependencies global_js %}
@@ -25,11 +23,13 @@
   <div class="gizmo-page-wrapper">
     <h2>Jobs Table</h2>
     {% gizmo jobs_table %}
-    {% if not jobs_table.jobs %}
-        <a class="btn btn-success" href="{% url 'gizmos:sample_jobs' %}">Create Sample Jobs</a>
-    {% endif %}
   </div>
 {% endblock %}
+
+{% block app_actions %}
+  {% gizmo home_button %}
+{% endblock %}
+
 
 {% block scripts %}
   {% gizmo_dependencies css %}
