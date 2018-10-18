@@ -26,6 +26,11 @@
 
 {% endblock %}
 
+{% block app_actions %}
+  {% gizmo home_button %}
+  {% gizmo jobs_button %}
+{% endblock %}
+
 {% block scripts %}
   {% gizmo_dependencies css %}
 	{{ block.super }}

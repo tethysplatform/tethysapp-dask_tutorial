@@ -6,7 +6,7 @@ from dask.distributed import Client
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
-from tethysapp.dask_tutorial.job_functions import total, total_future, rando
+from tethysapp.dask_tutorial.job_functions import total, total_future, inc
 from django.http.response import HttpResponseRedirect
 
 
@@ -78,7 +78,7 @@ def run_job(request, status):
         # Get the client to create future
         client = Client(scheduler.host)
         # Create future
-        future_job = client.submit(rando, 15, pure=False)
+        future_job = client.submit(total_future, pure=False)
         # Execute future
         dask.execute(future_job)
 
@@ -125,6 +125,29 @@ def result(request, job_id):
     # Get result and Key
     job_result = job.result()
     key = job.key
-    context = {'result': job_result, 'key': key}
+
+    home_button = Button(
+        display_text='Home',
+        name='home_button',
+        attributes={
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Home'
+        },
+        href=reverse('dask_tutorial:home')
+    )
+
+    jobs_button = Button(
+        display_text='Show All Jobs',
+        name='dask_button',
+        attributes={
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Show All Jobs'
+        },
+        href=reverse('dask_tutorial:jobs-table')
+    )
+
+    context = {'result': job_result, 'key': key, 'home_button': home_button, 'jobs_button': jobs_button}
 
     return render(request, 'dask_tutorial/results.html', context)
