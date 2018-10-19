@@ -3,7 +3,7 @@ import dask
 
 
 def inc(x):
-    time.sleep(2)
+    time.sleep(3)
     return x + 1
 
 
@@ -13,7 +13,7 @@ def double(x):
 
 
 def add(x, y):
-    time.sleep(1)
+    time.sleep(10)
     return x + y
 
 
@@ -34,11 +34,11 @@ def total():
 
 
 # Future
-def total_future():
+def total_future(client):
     output = []
     for x in range(3):
-        a = inc(x)
-        b = double(x)
-        c = add(a, b)
+        a = client.submit(inc, x)
+        b = client.submit(double, x)
+        c = client.submit(add, a, b)
         output.append(c)
-    return sum_up(output)
+    return client.submit(sum_up, output)

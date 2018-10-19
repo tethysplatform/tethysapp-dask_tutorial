@@ -63,10 +63,13 @@ def run_job(request, status):
     Controller for the app home page.
     """
     if status:
+        # Get test_scheduler app. This scheduler needs to be in the database.
         scheduler = get_scheduler(name='test_scheduler')
-        dask = DaskJob(name='test_dask_job', user=request.user, label='test_dask', scheduler=scheduler)
 
     if status.lower() == 'delayed':
+        # Create a Dask Job with no _process_results_function
+        dask = DaskJob(name='dask_delayed', user=request.user, label='test_dask', scheduler=scheduler)
+
         # Create dask delayed object
         delayed_job = total()
 
@@ -74,11 +77,16 @@ def run_job(request, status):
         dask.execute(delayed_job)
 
     elif status.lower() == 'future':
+        # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
+        dask = DaskJob(name='dask_future', user=request.user, label='test_dask', scheduler=scheduler,
+                       _process_results_function='tethysapp.dask_tutorial.controllers.convert_to_dollar_sign')
 
         # Get the client to create future
-        client = Client(scheduler.host)
-        # Create future
-        future_job = client.submit(total_future, pure=False)
+        client = dask.client
+
+        # Create future job instance
+        future_job = total_future(client)
+
         # Execute future
         dask.execute(future_job)
 
@@ -151,3 +159,7 @@ def result(request, job_id):
     context = {'result': job_result, 'key': key, 'home_button': home_button, 'jobs_button': jobs_button}
 
     return render(request, 'dask_tutorial/results.html', context)
+
+
+def convert_to_dollar_sign(result):
+    return '$' + str(result)
