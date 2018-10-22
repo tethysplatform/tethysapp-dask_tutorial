@@ -18,7 +18,7 @@ def add(x, y):
 
 
 def sum_up(x):
-    time.sleep(5)
+    time.sleep(3000)
     return sum(x)
 
 
@@ -42,3 +42,18 @@ def total_future(client):
         c = client.submit(add, a, b)
         output.append(c)
     return client.submit(sum_up, output)
+
+
+# Multiple Future Instances
+def multiple_future(client):
+    output = []
+    for x in range(3):
+        a = client.submit(inc, x)
+        b = client.submit(double, x)
+        c = client.submit(add, a, b)
+        output.append(c)
+    return output
+
+
+def convert_to_dollar_sign(result):
+    return '$' + str(result)

@@ -6,9 +6,9 @@ from dask.distributed import Client
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
-from tethysapp.dask_tutorial.job_functions import total, total_future, inc
+from tethysapp.dask_tutorial.job_functions import total, total_future, multiple_future
 from django.http.response import HttpResponseRedirect
-
+import random
 
 @login_required()
 def home(request):
@@ -37,6 +37,17 @@ def home(request):
         href=reverse('dask_tutorial:run-dask', kwargs={'status': 'future'})
     )
 
+    dask_multiple_future_button = Button(
+        display_text='Dask Multiple Future Jobs',
+        name='dask_multiple_future_button',
+        attributes={
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Dask Multiple Future Jobs'
+        },
+        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'multiple-future'})
+    )
+
     jobs_button = Button(
         display_text='Show All Jobs',
         name='dask_button',
@@ -52,6 +63,7 @@ def home(request):
         'dask_delayed_button': dask_delayed_button,
         'dask_future_button': dask_future_button,
         'jobs_button': jobs_button,
+        'dask_multiple_future_button': dask_multiple_future_button,
     }
 
     return render(request, 'dask_tutorial/home.html', context)
@@ -79,7 +91,7 @@ def run_job(request, status):
     elif status.lower() == 'future':
         # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
         dask = DaskJob(name='dask_future', user=request.user, label='test_dask', scheduler=scheduler,
-                       _process_results_function='tethysapp.dask_tutorial.controllers.convert_to_dollar_sign')
+                       _process_results_function='tethysapp.dask_tutorial.job_functions.convert_to_dollar_sign')
 
         # Get the client to create future
         client = dask.client
@@ -87,8 +99,23 @@ def run_job(request, status):
         # Create future job instance
         future_job = total_future(client)
 
-        # Execute future
         dask.execute(future_job)
+
+    elif status.lower() == 'multiple-future':
+        # Get the client to create future
+        client = Client(scheduler.host)
+
+        # Create future job instance
+        future_job = multiple_future(client)
+
+        # Execute multiple future
+        i = random.randint(1, 10000)
+
+        for job in future_job:
+            i += 1
+            name = 'dask_future' + str(i)
+            dask = DaskJob(name=name, user=request.user, label='test_dask', scheduler=scheduler)
+            dask.execute(job)
 
     return HttpResponseRedirect(reverse('dask_tutorial:jobs-table'))
 
@@ -161,5 +188,3 @@ def result(request, job_id):
     return render(request, 'dask_tutorial/results.html', context)
 
 
-def convert_to_dollar_sign(result):
-    return '$' + str(result)
