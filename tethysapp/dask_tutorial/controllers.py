@@ -165,7 +165,7 @@ def result(request, job_id):
 
     # Get result and Key
     job_result = job.result()
-    key = job.key
+    name = job.name
 
     home_button = Button(
         display_text='Home',
@@ -189,7 +189,7 @@ def result(request, job_id):
         href=reverse('dask_tutorial:jobs-table')
     )
 
-    context = {'result': job_result, 'key': key, 'home_button': home_button, 'jobs_button': jobs_button}
+    context = {'result': job_result, 'name': name, 'home_button': home_button, 'jobs_button': jobs_button}
 
     return render(request, 'dask_tutorial/results.html', context)
 

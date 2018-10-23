@@ -18,7 +18,7 @@ def add(x, y):
 
 
 def sum_up(x):
-    time.sleep(3000)
+    time.sleep(5)
     return sum(x)
 
 
@@ -37,9 +37,9 @@ def total():
 def total_future(client):
     output = []
     for x in range(3):
-        a = client.submit(inc, x)
-        b = client.submit(double, x)
-        c = client.submit(add, a, b)
+        a = client.submit(inc, x, pure=False)
+        b = client.submit(double, x, pure=False)
+        c = client.submit(add, a, b, pure=False)
         output.append(c)
     return client.submit(sum_up, output)
 
@@ -48,9 +48,9 @@ def total_future(client):
 def multiple_future(client):
     output = []
     for x in range(3):
-        a = client.submit(inc, x)
-        b = client.submit(double, x)
-        c = client.submit(add, a, b)
+        a = client.submit(inc, x, pure=False)
+        b = client.submit(double, x, pure=False)
+        c = client.submit(add, a, b, pure=False)
         output.append(c)
     return output
 
