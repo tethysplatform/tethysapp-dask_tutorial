@@ -1,4 +1,4 @@
-from django.shortcuts import render, reverse
+from django.shortcuts import render, reverse, redirect
 from django.contrib.auth.decorators import login_required
 from tethys_sdk.gizmos import Button
 
@@ -10,8 +10,11 @@ from tethysapp.dask_tutorial.job_functions import total, total_future, multiple_
 from django.http.response import HttpResponseRedirect
 import random
 
+from tethys_compute.models.dask.dask_job_exception import DaskJobException
+from django.contrib import messages
+
 @login_required()
-def home(request):
+def home(request, error=False):
     """
     Controller for the app home page.
     """
@@ -94,7 +97,10 @@ def run_job(request, status):
                        _process_results_function='tethysapp.dask_tutorial.job_functions.convert_to_dollar_sign')
 
         # Get the client to create future
-        client = dask.client
+        try:
+            client = dask.client
+        except DaskJobException as e:
+            return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
         future_job = total_future(client)
@@ -187,4 +193,10 @@ def result(request, job_id):
 
     return render(request, 'dask_tutorial/results.html', context)
 
+
+@login_required()
+def error_message(request):
+    messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
+
+    return redirect(reverse('dask_tutorial:home'))
 

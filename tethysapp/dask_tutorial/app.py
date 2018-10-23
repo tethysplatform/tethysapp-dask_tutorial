@@ -43,6 +43,11 @@ class DaskTutorial(TethysAppBase):
                 url='dask-tutorial/dask/result/{job_id}',
                 controller='dask_tutorial.controllers.result'
             ),
+            UrlMap(
+                name='error_message',
+                url='dask-tutorial/dask/error',
+                controller='dask_tutorial.controllers.error_message'
+            ),
         )
 
         return url_maps
