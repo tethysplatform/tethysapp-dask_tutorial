@@ -14,7 +14,7 @@ from tethys_compute.models.dask.dask_job_exception import DaskJobException
 from django.contrib import messages
 
 @login_required()
-def home(request, error=False):
+def home(request):
     """
     Controller for the app home page.
     """
