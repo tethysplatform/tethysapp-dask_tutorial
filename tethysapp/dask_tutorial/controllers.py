@@ -2,9 +2,9 @@ from django.shortcuts import render, reverse, redirect
 from django.contrib.auth.decorators import login_required
 from tethys_sdk.gizmos import Button
 
-from dask.distributed import Client
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
+from dask.distributed import Client
 from tethys_sdk.gizmos import JobsTable
 from tethysapp.dask_tutorial.job_functions import total, total_future, multiple_future
 from django.http.response import HttpResponseRedirect
