@@ -29,26 +29,26 @@ def home(request):
         href=reverse('dask_tutorial:run-dask', kwargs={'status': 'delayed'})
     )
 
-    dask_future_button = Button(
-        display_text='Dask Future Job',
-        name='dask_future_button',
+    dask_distributed_button = Button(
+        display_text='Dask Distributed Job',
+        name='dask_distributed_button',
         attributes={
             'data-toggle': 'tooltip',
             'data-placement': 'top',
             'title': 'Dask Future Job'
         },
-        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'future'})
+        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'distributed'})
     )
 
-    dask_multiple_future_button = Button(
-        display_text='Dask Multiple Future Jobs',
-        name='dask_multiple_future_button',
+    dask_multiple_leaf_button = Button(
+        display_text='Dask Multiple Leaf Jobs',
+        name='dask_multiple_leaf_button',
         attributes={
             'data-toggle': 'tooltip',
             'data-placement': 'top',
-            'title': 'Dask Multiple Future Jobs'
+            'title': 'Dask Multiple Leaf Jobs'
         },
-        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'multiple-future'})
+        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'multiple-leaf'})
     )
 
     jobs_button = Button(
@@ -64,9 +64,9 @@ def home(request):
 
     context = {
         'dask_delayed_button': dask_delayed_button,
-        'dask_future_button': dask_future_button,
+        'dask_distributed_button': dask_distributed_button,
         'jobs_button': jobs_button,
-        'dask_multiple_future_button': dask_multiple_future_button,
+        'dask_multiple_leaf_button': dask_multiple_leaf_button,
     }
 
     return render(request, 'dask_tutorial/home.html', context)
@@ -91,9 +91,9 @@ def run_job(request, status):
         # Execute future
         dask.execute(delayed_job)
 
-    elif status.lower() == 'future':
+    elif status.lower() == 'distributed':
         # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
-        dask = DaskJob(name='dask_future', user=request.user, label='test_dask', scheduler=scheduler,
+        dask = DaskJob(name='dask_distributed', user=request.user, label='test_dask', scheduler=scheduler,
                        _process_results_function='tethysapp.dask_tutorial.job_functions.convert_to_dollar_sign')
 
         # Get the client to create future
@@ -103,11 +103,11 @@ def run_job(request, status):
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
-        future_job = total_future(client)
+        distributed_job = total_future(client)
 
-        dask.execute(future_job)
+        dask.execute(distributed_job)
 
-    elif status.lower() == 'multiple-future':
+    elif status.lower() == 'multiple-leaf':
         # Get the client to create future
         client = Client(scheduler.host)
 
@@ -119,7 +119,7 @@ def run_job(request, status):
 
         for job in future_job:
             i += 1
-            name = 'dask_future' + str(i)
+            name = 'dask_leaf' + str(i)
             dask = DaskJob(name=name, user=request.user, label='test_dask', scheduler=scheduler)
             dask.execute(job)
 
