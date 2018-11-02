@@ -22,8 +22,8 @@ def sum_up(x):
     return sum(x)
 
 
-# Delayed
-def total():
+# Delayed Job
+def delayed_job():
     output = []
     for x in range(3):
         a = dask.delayed(inc, pure=False)(x)
@@ -33,8 +33,8 @@ def total():
     return dask.delayed(sum_up, pure=False)(output)
 
 
-# Distributed
-def total_future(client):
+# Distributed Job
+def distributed_job(client):
     output = []
     for x in range(3):
         a = client.submit(inc, x, pure=False)
@@ -44,8 +44,8 @@ def total_future(client):
     return client.submit(sum_up, output)
 
 
-# Multiple Distributed Instances
-def multiple_future(client):
+# Multiple Leaf Distributed Job
+def muliple_leaf_job(client):
     output = []
     for x in range(3):
         a = client.submit(inc, x, pure=False)

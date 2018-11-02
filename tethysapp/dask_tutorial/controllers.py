@@ -1,17 +1,15 @@
+import random
+from dask.distributed import Client
 from django.shortcuts import render, reverse, redirect
 from django.contrib.auth.decorators import login_required
+from django.http.response import HttpResponseRedirect
+from django.contrib import messages
 from tethys_sdk.gizmos import Button
-
 from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
-from dask.distributed import Client
 from tethys_sdk.gizmos import JobsTable
-from tethysapp.dask_tutorial.job_functions import total, total_future, multiple_future
-from django.http.response import HttpResponseRedirect
-import random
-
 from tethys_compute.models.dask.dask_job_exception import DaskJobException
-from django.contrib import messages
+
 
 @login_required()
 def home(request):
@@ -82,16 +80,20 @@ def run_job(request, status):
         scheduler = get_scheduler(name='test_scheduler')
 
     if status.lower() == 'delayed':
+        from tethysapp.dask_tutorial.job_functions import delayed_job
+
         # Create a Dask Job with no _process_results_function
         dask = DaskJob(name='dask_delayed', user=request.user, label='test_dask', scheduler=scheduler)
 
         # Create dask delayed object
-        delayed_job = total()
+        delayed_job = delayed_job()
 
         # Execute future
         dask.execute(delayed_job)
 
     elif status.lower() == 'distributed':
+        from tethysapp.dask_tutorial.job_functions import distributed_job
+
         # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
         dask = DaskJob(name='dask_distributed', user=request.user, label='test_dask', scheduler=scheduler,
                        _process_results_function='tethysapp.dask_tutorial.job_functions.convert_to_dollar_sign')
@@ -103,16 +105,18 @@ def run_job(request, status):
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
-        distributed_job = total_future(client)
+        distributed_job = distributed_job(client)
 
         dask.execute(distributed_job)
 
     elif status.lower() == 'multiple-leaf':
+        from tethysapp.dask_tutorial.job_functions import muliple_leaf_job
+
         # Get the client to create future
         client = Client(scheduler.host)
 
         # Create future job instance
-        future_job = multiple_future(client)
+        future_job = muliple_leaf_job(client)
 
         # Execute multiple future
         i = random.randint(1, 10000)
