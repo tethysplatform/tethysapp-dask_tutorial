@@ -33,7 +33,7 @@ def total():
     return dask.delayed(sum_up, pure=False)(output)
 
 
-# Future
+# Distributed
 def total_future(client):
     output = []
     for x in range(3):
@@ -44,7 +44,7 @@ def total_future(client):
     return client.submit(sum_up, output)
 
 
-# Multiple Future Instances
+# Multiple Distributed Instances
 def multiple_future(client):
     output = []
     for x in range(3):
