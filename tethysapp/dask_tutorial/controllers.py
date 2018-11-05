@@ -92,11 +92,11 @@ def run_job(request, status):
         dask.execute(delayed_job)
 
     elif status.lower() == 'distributed':
-        from tethysapp.dask_tutorial.job_functions import distributed_job
+        from tethysapp.dask_tutorial.job_functions import distributed_job, convert_to_dollar_sign
 
         # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
-        dask = DaskJob(name='dask_distributed', user=request.user, label='test_dask', scheduler=scheduler,
-                       _process_results_function='tethysapp.dask_tutorial.job_functions.convert_to_dollar_sign')
+        dask = DaskJob(name='dask_distributed', user=request.user, label='test_dask', scheduler=scheduler)
+        dask.process_results_function = convert_to_dollar_sign
 
         # Get the client to create future
         try:

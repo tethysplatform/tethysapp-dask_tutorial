@@ -7,9 +7,17 @@
   </div>
 {% endblock %}
 
+{% block app_content %}
+<h2>Dask Delayed Job</h2>
+{% gizmo dask_delayed_button %}
+
+<h2>Dask Distributed Job</h2>
+{% gizmo dask_distributed_button %}
+
+<h2>Multi Leaf Distributed Job</h2>
+{% gizmo dask_multiple_leaf_button %}
+{% endblock %}
+
 {% block app_actions %}
-  {% gizmo dask_delayed_button %}
-  {% gizmo dask_distributed_button %}
-  {% gizmo dask_multiple_leaf_button %}
   {% gizmo jobs_button %}
 {% endblock %}
