@@ -89,8 +89,7 @@ def run_job(request, status):
             job_type='DASK',
             name='dask_distributed',
             user=request.user,
-            scheduler=scheduler,
-            delayed_or_future=delayed_job
+            scheduler=scheduler
         )
 
         # Execute future
@@ -112,10 +111,9 @@ def run_job(request, status):
             name='dask_distributed',
             user=request.user,
             scheduler=scheduler,
-            delayed_or_future=distributed_job
         )
         dask.process_results_function = convert_to_dollar_sign
-        dask.execute()
+        dask.execute(distributed_job)
 
     elif status.lower() == 'multiple-leaf':
         from tethysapp.dask_tutorial.job_functions import muliple_leaf_job
@@ -139,10 +137,9 @@ def run_job(request, status):
                 job_type='DASK',
                 name=name,
                 user=request.user,
-                scheduler=scheduler,
-                delayed_or_future=job
+                scheduler=scheduler
             )
-            dask.execute()
+            dask.execute(job)
 
     return HttpResponseRedirect(reverse('dask_tutorial:jobs-table'))
 
