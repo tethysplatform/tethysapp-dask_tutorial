@@ -100,7 +100,7 @@ def run_job(request, status):
 
         # Get the client to create future
         try:
-            client = scheduler.get_client()
+            client = scheduler.client
         except DaskJobException:
             return redirect(reverse('dask_tutorial:error_message'))
 
@@ -120,7 +120,7 @@ def run_job(request, status):
 
         # Get the client to create future
         try:
-            client = scheduler.get_client()
+            client = scheduler.client
         except DaskJobException:
             return redirect(reverse('dask_tutorial:error_message'))
 
