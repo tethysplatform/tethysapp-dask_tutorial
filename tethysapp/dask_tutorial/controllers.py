@@ -9,6 +9,7 @@ from tethys_sdk.compute import get_scheduler
 from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
 from tethys_compute.models.dask.dask_job_exception import DaskJobException
+from tethysapp.dask_tutorial.app import DaskTutorial as app
 
 
 @login_required()
@@ -75,18 +76,22 @@ def run_job(request, status):
     """
     Controller for the app home page.
     """
-    if status:
-        # Get test_scheduler app. This scheduler needs to be in the database.
-        scheduler = get_scheduler(name='test_scheduler')
+    # Get test_scheduler app. This scheduler needs to be in the database.
+    scheduler = get_scheduler(name='test_scheduler')
+    job_manager = app.get_job_manager()
 
     if status.lower() == 'delayed':
         from tethysapp.dask_tutorial.job_functions import delayed_job
 
-        # Create a Dask Job with no _process_results_function
-        dask = DaskJob(name='dask_delayed', user=request.user, label='test_dask', scheduler=scheduler)
-
         # Create dask delayed object
         delayed_job = delayed_job()
+        dask = job_manager.create_job(
+            job_type='DASK',
+            name='dask_distributed',
+            user=request.user,
+            scheduler=scheduler,
+            delayed_or_future=delayed_job
+        )
 
         # Execute future
         dask.execute(delayed_job)
@@ -94,26 +99,32 @@ def run_job(request, status):
     elif status.lower() == 'distributed':
         from tethysapp.dask_tutorial.job_functions import distributed_job, convert_to_dollar_sign
 
-        # Create a Dask Job using _process_results_function. We'll use this one for future job scenario
-        dask = DaskJob(name='dask_distributed', user=request.user, label='test_dask', scheduler=scheduler)
-        dask.process_results_function = convert_to_dollar_sign
-
         # Get the client to create future
         try:
-            client = dask.client
-        except DaskJobException as e:
+            client = scheduler.get_client()
+        except DaskJobException:
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
         distributed_job = distributed_job(client)
-
-        dask.execute(distributed_job)
+        dask = job_manager.create_job(
+            job_type='DASK',
+            name='dask_distributed',
+            user=request.user,
+            scheduler=scheduler,
+            delayed_or_future=distributed_job
+        )
+        dask.process_results_function = convert_to_dollar_sign
+        dask.execute()
 
     elif status.lower() == 'multiple-leaf':
         from tethysapp.dask_tutorial.job_functions import muliple_leaf_job
 
         # Get the client to create future
-        client = Client(scheduler.host)
+        try:
+            client = scheduler.get_client()
+        except DaskJobException:
+            return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
         future_job = muliple_leaf_job(client)
@@ -124,8 +135,14 @@ def run_job(request, status):
         for job in future_job:
             i += 1
             name = 'dask_leaf' + str(i)
-            dask = DaskJob(name=name, user=request.user, label='test_dask', scheduler=scheduler)
-            dask.execute(job)
+            dask = job_manager.create_job(
+                job_type='DASK',
+                name=name,
+                user=request.user,
+                scheduler=scheduler,
+                delayed_or_future=job
+            )
+            dask.execute()
 
     return HttpResponseRedirect(reverse('dask_tutorial:jobs-table'))
 
