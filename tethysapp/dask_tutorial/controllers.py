@@ -5,10 +5,12 @@ from django.http.response import HttpResponseRedirect
 from django.contrib import messages
 from tethys_sdk.gizmos import Button
 from tethys_sdk.compute import get_scheduler
-from tethys_sdk.jobs import DaskJob
 from tethys_sdk.gizmos import JobsTable
 from tethys_compute.models.dask.dask_job_exception import DaskJobException
 from tethysapp.dask_tutorial.app import DaskTutorial as app
+
+# get job manager for the app
+job_manager = app.get_job_manager()
 
 
 @login_required()
@@ -77,7 +79,6 @@ def run_job(request, status):
     """
     # Get test_scheduler app. This scheduler needs to be in the database.
     scheduler = get_scheduler(name='test_scheduler')
-    job_manager = app.get_job_manager()
 
     if status.lower() == 'delayed':
         from tethysapp.dask_tutorial.job_functions import delayed_job
@@ -145,7 +146,8 @@ def run_job(request, status):
 
 @login_required()
 def jobs_table(request):
-    jobs = DaskJob.objects.filter().order_by('-id')
+    # Using job manager to get all jobs in the database.
+    jobs = job_manager.list_jobs(order_by='-id', filters=None)
     # Table View
     jobs_table_options = JobsTable(
         jobs=jobs,
@@ -178,7 +180,8 @@ def jobs_table(request):
 
 @login_required()
 def result(request, job_id):
-    job = DaskJob.objects.get(id=job_id)
+    # Using job manager to get the specified job.
+    job = job_manager.get_job(job_id=job_id)
 
     # Get result and Key
     job_result = job.result()
