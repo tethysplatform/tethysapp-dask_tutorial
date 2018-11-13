@@ -84,16 +84,17 @@ def run_job(request, status):
         from tethysapp.dask_tutorial.job_functions import delayed_job
 
         # Create dask delayed object
-        delayed_job = delayed_job()
+        delayed = delayed_job()
         dask = job_manager.create_job(
             job_type='DASK',
             name='dask_distributed',
             user=request.user,
-            scheduler=scheduler
+            scheduler=scheduler,
+            future_or_delayed=delayed
         )
 
         # Execute future
-        dask.execute(delayed_job)
+        dask.execute()
 
     elif status.lower() == 'distributed':
         from tethysapp.dask_tutorial.job_functions import distributed_job, convert_to_dollar_sign
@@ -105,15 +106,16 @@ def run_job(request, status):
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
-        distributed_job = distributed_job(client)
+        future = distributed_job(client)
         dask = job_manager.create_job(
             job_type='DASK',
             name='dask_distributed',
             user=request.user,
             scheduler=scheduler,
+            future_or_delayed=future
         )
         dask.process_results_function = convert_to_dollar_sign
-        dask.execute(distributed_job)
+        dask.execute()
 
     elif status.lower() == 'multiple-leaf':
         from tethysapp.dask_tutorial.job_functions import muliple_leaf_job
@@ -125,21 +127,22 @@ def run_job(request, status):
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
-        future_job = muliple_leaf_job(client)
+        futures = muliple_leaf_job(client)
 
         # Execute multiple future
         i = random.randint(1, 10000)
 
-        for job in future_job:
+        for future in futures:
             i += 1
             name = 'dask_leaf' + str(i)
             dask = job_manager.create_job(
                 job_type='DASK',
                 name=name,
                 user=request.user,
-                scheduler=scheduler
+                scheduler=scheduler,
+                future_or_delayed=future
             )
-            dask.execute(job)
+            dask.execute()
 
     return HttpResponseRedirect(reverse('dask_tutorial:jobs-table'))
 
@@ -184,7 +187,7 @@ def result(request, job_id):
     job = job_manager.get_job(job_id=job_id)
 
     # Get result and Key
-    job_result = job.result()
+    job_result = job.result
     name = job.name
 
     home_button = Button(
