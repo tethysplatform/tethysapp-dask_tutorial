@@ -45,7 +45,7 @@ def distributed_job(client):
 
 
 # Multiple Leaf Distributed Job
-def muliple_leaf_job(client):
+def multiple_leaf_job(client):
     output = []
     for x in range(3):
         a = client.submit(inc, x, pure=False)

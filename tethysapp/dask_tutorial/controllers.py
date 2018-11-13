@@ -26,7 +26,7 @@ def home(request):
             'data-placement': 'top',
             'title': 'Dask Delayed Job'
         },
-        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'delayed'})
+        href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'delayed'})
     )
 
     dask_distributed_button = Button(
@@ -37,7 +37,7 @@ def home(request):
             'data-placement': 'top',
             'title': 'Dask Future Job'
         },
-        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'distributed'})
+        href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'distributed'})
     )
 
     dask_multiple_leaf_button = Button(
@@ -48,7 +48,7 @@ def home(request):
             'data-placement': 'top',
             'title': 'Dask Multiple Leaf Jobs'
         },
-        href=reverse('dask_tutorial:run-dask', kwargs={'status': 'multiple-leaf'})
+        href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'multiple-leaf'})
     )
 
     jobs_button = Button(
@@ -65,22 +65,22 @@ def home(request):
     context = {
         'dask_delayed_button': dask_delayed_button,
         'dask_distributed_button': dask_distributed_button,
-        'jobs_button': jobs_button,
         'dask_multiple_leaf_button': dask_multiple_leaf_button,
+        'jobs_button': jobs_button,
     }
 
     return render(request, 'dask_tutorial/home.html', context)
 
 
 @login_required()
-def run_job(request, status):
+def run_job(request, job_type):
     """
     Controller for the app home page.
     """
     # Get test_scheduler app. This scheduler needs to be in the database.
     scheduler = get_scheduler(name='test_scheduler')
 
-    if status.lower() == 'delayed':
+    if job_type.lower() == 'delayed':
         from tethysapp.dask_tutorial.job_functions import delayed_job
 
         # Create dask delayed object
@@ -95,7 +95,7 @@ def run_job(request, status):
         # Execute future
         dask.execute(delayed)
 
-    elif status.lower() == 'distributed':
+    elif job_type.lower() == 'distributed':
         from tethysapp.dask_tutorial.job_functions import distributed_job, convert_to_dollar_sign
 
         # Get the client to create future
@@ -115,8 +115,8 @@ def run_job(request, status):
         dask.process_results_function = convert_to_dollar_sign
         dask.execute(future)
 
-    elif status.lower() == 'multiple-leaf':
-        from tethysapp.dask_tutorial.job_functions import muliple_leaf_job
+    elif job_type.lower() == 'multiple-leaf':
+        from tethysapp.dask_tutorial.job_functions import multiple_leaf_job
 
         # Get the client to create future
         try:
@@ -125,7 +125,7 @@ def run_job(request, status):
             return redirect(reverse('dask_tutorial:error_message'))
 
         # Create future job instance
-        futures = muliple_leaf_job(client)
+        futures = multiple_leaf_job(client)
 
         # Execute multiple future
         i = random.randint(1, 10000)
@@ -146,8 +146,9 @@ def run_job(request, status):
 
 @login_required()
 def jobs_table(request):
-    # Using job manager to get all jobs in the database.
+    # Use job manager to get all the jobs.
     jobs = job_manager.list_jobs(order_by='-id', filters=None)
+
     # Table View
     jobs_table_options = JobsTable(
         jobs=jobs,
@@ -180,10 +181,10 @@ def jobs_table(request):
 
 @login_required()
 def result(request, job_id):
-    # Using job manager to get the specified job.
+    # Use job manager to get the given job.
     job = job_manager.get_job(job_id=job_id)
 
-    # Get result and Key
+    # Get result and name
     job_result = job.result
     name = job.name
 
@@ -217,6 +218,4 @@ def result(request, job_id):
 @login_required()
 def error_message(request):
     messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
-
     return redirect(reverse('dask_tutorial:home'))
-
