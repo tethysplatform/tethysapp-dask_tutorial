@@ -1,5 +1,5 @@
 {% extends "dask_tutorial/base.html" %}
-{% load staticfiles tethys_gizmos %}
+{% load static tethys_gizmos %}
 
 {% load tethys_gizmos %}
 
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block styles %}
-	{{ block.super }}
+    {{ block.super }}
     {% gizmo_dependencies global_css %}
   <link rel="stylesheet" href="{% static 'tethys_gizmos/css/gizmo_showcase.css' %}" type="text/css" />
   <style>
@@ -33,6 +33,6 @@
 
 {% block scripts %}
   {% gizmo_dependencies css %}
-	{{ block.super }}
+  {{ block.super }}
   {% gizmo_dependencies js %}
 {% endblock %}

@@ -1,6 +1,6 @@
 import random
 from django.shortcuts import render, reverse, redirect
-from django.contrib.auth.decorators import login_required
+from tethys_sdk.permissions import login_required
 from django.http.response import HttpResponseRedirect
 from django.contrib import messages
 from tethys_sdk.gizmos import Button
@@ -87,7 +87,7 @@ def run_job(request, job_type):
         delayed = delayed_job()
         dask = job_manager.create_job(
             job_type='DASK',
-            name='dask_distributed',
+            name='dask_delayed',
             user=request.user,
             scheduler=scheduler,
         )
@@ -146,9 +146,8 @@ def run_job(request, job_type):
 
 @login_required()
 def jobs_table(request):
-    # Use job manager to get all the jobs.
+    # Using job manager to get all jobs in the database.
     jobs = job_manager.list_jobs(order_by='-id', filters=None)
-
     # Table View
     jobs_table_options = JobsTable(
         jobs=jobs,
@@ -181,10 +180,10 @@ def jobs_table(request):
 
 @login_required()
 def result(request, job_id):
-    # Use job manager to get the given job.
+    # Using job manager to get the specified job.
     job = job_manager.get_job(job_id=job_id)
 
-    # Get result and name
+    # Get result and Key
     job_result = job.result
     name = job.name
 
@@ -218,4 +217,5 @@ def result(request, job_id):
 @login_required()
 def error_message(request):
     messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
+
     return redirect(reverse('dask_tutorial:home'))

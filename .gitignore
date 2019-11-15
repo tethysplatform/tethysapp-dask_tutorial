@@ -7,5 +7,5 @@
 *.db
 *.sqlite
 *.DS_Store
-.idea
-dask-worker-space
+.idea/
+services.yml

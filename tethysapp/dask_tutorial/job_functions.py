@@ -22,6 +22,10 @@ def sum_up(x):
     return sum(x)
 
 
+def convert_to_dollar_sign(result):
+    return '$' + str(result)
+
+
 # Delayed Job
 def delayed_job():
     output = []
@@ -53,7 +57,3 @@ def multiple_leaf_job(client):
         c = client.submit(add, a, b, pure=False)
         output.append(c)
     return output
-
-
-def convert_to_dollar_sign(result):
-    return '$' + str(result)
