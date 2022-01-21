@@ -1,4 +1,6 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
+from tethys_sdk.app_settings import SchedulerSetting
+
 
 class DaskTutorial(TethysAppBase):
     """
@@ -51,3 +53,15 @@ class DaskTutorial(TethysAppBase):
         )
 
         return url_maps
+
+    def scheduler_settings(self):
+        scheduler_settings = (
+            SchedulerSetting(
+                name='dask_primary',
+                description='Scheduler for a Dask distributed cluster.',
+                engine=SchedulerSetting.DASK,
+                required=True
+            ),
+        )
+
+        return scheduler_settings

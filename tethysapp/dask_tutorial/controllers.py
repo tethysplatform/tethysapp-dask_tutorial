@@ -4,7 +4,6 @@ from tethys_sdk.permissions import login_required
 from django.http.response import HttpResponseRedirect
 from django.contrib import messages
 from tethys_sdk.gizmos import Button
-from tethys_sdk.compute import get_scheduler
 from tethys_sdk.gizmos import JobsTable
 from tethys_compute.models.dask.dask_job_exception import DaskJobException
 from tethysapp.dask_tutorial.app import DaskTutorial as app
@@ -22,8 +21,8 @@ def home(request):
         display_text='Dask Delayed Job',
         name='dask_delayed_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Dask Delayed Job'
         },
         href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'delayed'})
@@ -33,8 +32,8 @@ def home(request):
         display_text='Dask Distributed Job',
         name='dask_distributed_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Dask Future Job'
         },
         href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'distributed'})
@@ -44,8 +43,8 @@ def home(request):
         display_text='Dask Multiple Leaf Jobs',
         name='dask_multiple_leaf_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Dask Multiple Leaf Jobs'
         },
         href=reverse('dask_tutorial:run-dask', kwargs={'job_type': 'multiple-leaf'})
@@ -55,8 +54,8 @@ def home(request):
         display_text='Show All Jobs',
         name='dask_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Show All Jobs'
         },
         href=reverse('dask_tutorial:jobs-table')
@@ -77,8 +76,8 @@ def run_job(request, job_type):
     """
     Controller for the app home page.
     """
-    # Get test_scheduler app. This scheduler needs to be in the database.
-    scheduler = get_scheduler(name='test_scheduler')
+    # Get scheduler from dask_primary setting.
+    scheduler = app.get_scheduler(name='dask_primary')
 
     if job_type.lower() == 'delayed':
         from tethysapp.dask_tutorial.job_functions import delayed_job
@@ -166,8 +165,8 @@ def jobs_table(request):
         display_text='Home',
         name='home_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Home'
         },
         href=reverse('dask_tutorial:home')
@@ -191,8 +190,8 @@ def result(request, job_id):
         display_text='Home',
         name='home_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Home'
         },
         href=reverse('dask_tutorial:home')
@@ -202,8 +201,8 @@ def result(request, job_id):
         display_text='Show All Jobs',
         name='dask_button',
         attributes={
-            'data-toggle': 'tooltip',
-            'data-placement': 'top',
+            'bs-data-toggle': 'tooltip',
+            'bs-data-placement': 'top',
             'title': 'Show All Jobs'
         },
         href=reverse('dask_tutorial:jobs-table')
