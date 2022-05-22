@@ -39,6 +39,17 @@ def home(request):
         href=reverse('dask_tutorial:run_job', kwargs={'job_type': 'distributed'})
     )
 
+    dask_multiple_leaf_button = Button(
+        display_text='Dask Multiple Leaf Jobs',
+        name='dask_multiple_leaf_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Dask Multiple Leaf Jobs'
+        },
+        href=reverse('dask_tutorial:run_job', kwargs={'job_type': 'multiple-leaf'})
+    )
+
     jobs_button = Button(
         display_text='Show All Jobs',
         name='dask_button',
@@ -53,6 +64,7 @@ def home(request):
     context = {
         'dask_delayed_button': dask_delayed_button,
         'dask_distributed_button': dask_distributed_button,
+        'dask_multiple_leaf_button': dask_multiple_leaf_button,
         'jobs_button': jobs_button,
     }
 
@@ -183,5 +195,31 @@ def run_job(request, job_type):
         )
         dask.process_results_function = convert_to_dollar_sign
         dask.execute(future)
+
+    elif job_type.lower() == 'multiple-leaf':
+        from tethysapp.dask_tutorial.job_functions import multiple_leaf_job
+
+        # Get the client to create future
+        try:
+            client = scheduler.client
+        except DaskJobException:
+            return redirect(reverse('dask_tutorial:error_message'))
+
+        # Create future job instance
+        futures = multiple_leaf_job(client)
+
+        # Execute multiple future
+        i = random.randint(1, 10000)
+
+        for future in futures:
+            i += 1
+            name = 'dask_leaf' + str(i)
+            dask = job_manager.create_job(
+                job_type='DASK',
+                name=name,
+                user=request.user,
+                scheduler=scheduler,
+            )
+            dask.execute(future)
 
     return HttpResponseRedirect(reverse('dask_tutorial:jobs_table'))

@@ -46,3 +46,14 @@ def distributed_job(client):
         c = client.submit(add, a, b, pure=False)
         output.append(c)
     return client.submit(sum_up, output)
+
+
+# Multiple Leaf Distributed Job
+def multiple_leaf_job(client):
+    output = []
+    for x in range(3):
+        a = client.submit(inc, x, pure=False)
+        b = client.submit(double, x, pure=False)
+        c = client.submit(add, a, b, pure=False)
+        output.append(c)
+    return output
