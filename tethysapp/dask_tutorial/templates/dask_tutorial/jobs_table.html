@@ -11,28 +11,27 @@
 {% block styles %}
     {{ block.super }}
     {% gizmo_dependencies global_css %}
-  <link rel="stylesheet" href="{% static 'tethys_gizmos/css/gizmo_showcase.css' %}" type="text/css" />
-  <style>
+<link rel="stylesheet" href="{% static 'tethys_gizmos/css/gizmo_showcase.css' %}" type="text/css" />
+<style>
     #content {
-      padding-bottom: 50px;
+        padding-bottom: 50px;
     }
-  </style>
+</style>
 {% endblock %}
 
 {% block app_content %}
-  <div class="gizmo-page-wrapper">
+<div class="gizmo-page-wrapper">
     <h2>Jobs Table</h2>
     {% gizmo jobs_table %}
-  </div>
+</div>
 {% endblock %}
 
 {% block app_actions %}
-  {% gizmo home_button %}
+{% gizmo home_button %}
 {% endblock %}
 
-
 {% block scripts %}
-  {% gizmo_dependencies css %}
-  {{ block.super }}
-  {% gizmo_dependencies js %}
+{% gizmo_dependencies css %}
+    {{ block.super }}
+{% gizmo_dependencies js %}
 {% endblock %}
