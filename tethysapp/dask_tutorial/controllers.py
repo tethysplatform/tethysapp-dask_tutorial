@@ -17,6 +17,16 @@ def home(request):
     """
     Controller for the app home page.
     """
+    dask_delayed_button = Button(
+        display_text='Dask Delayed Job',
+        name='dask_delayed_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Dask Delayed Job'
+        },
+        href=reverse('dask_tutorial:run_job', kwargs={'job_type': 'delayed'})
+    )
 
     jobs_button = Button(
         display_text='Show All Jobs',
@@ -30,6 +40,7 @@ def home(request):
     )
 
     context = {
+        'dask_delayed_button': dask_delayed_button,
         'jobs_button': jobs_button
     }
 
@@ -116,3 +127,29 @@ def result(request, job_id):
 def error_message(request):
     messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
     return redirect(reverse('dask_tutorial:home'))
+
+
+@controller
+def run_job(request, job_type):
+    """
+    Controller for the app home page.
+    """
+    # Get scheduler from dask_primary setting.
+    scheduler = app.get_scheduler(name='dask_primary')
+
+    if job_type.lower() == 'delayed':
+        from tethysapp.dask_tutorial.job_functions import delayed_job
+
+        # Create dask delayed object
+        delayed = delayed_job()
+        dask = job_manager.create_job(
+            job_type='DASK',
+            name='dask_delayed',
+            user=request.user,
+            scheduler=scheduler,
+        )
+
+        # Execute future
+        dask.execute(delayed)
+
+    return HttpResponseRedirect(reverse('dask_tutorial:jobs_table'))
