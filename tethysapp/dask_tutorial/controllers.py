@@ -1,74 +1,118 @@
-from django.shortcuts import render
+import random
+from django.shortcuts import render, reverse, redirect
 from tethys_sdk.routing import controller
+from django.http.response import HttpResponseRedirect
+from django.contrib import messages
 from tethys_sdk.gizmos import Button
+from tethys_sdk.gizmos import JobsTable
+from tethys_compute.models.dask.dask_job_exception import DaskJobException
+from tethysapp.dask_tutorial.app import DaskTutorial as app
+
+# get job manager for the app
+job_manager = app.get_job_manager()
+
 
 @controller
 def home(request):
     """
     Controller for the app home page.
     """
-    save_button = Button(
-        display_text='',
-        name='save-button',
-        icon='save',
-        style='success',
-        attributes={
-            'data-bs-toggle':'tooltip',
-            'data-bs-placement':'top',
-            'title':'Save'
-        }
-    )
 
-    edit_button = Button(
-        display_text='',
-        name='edit-button',
-        icon='pen',
-        style='warning',
+    jobs_button = Button(
+        display_text='Show All Jobs',
+        name='dask_button',
         attributes={
-            'data-bs-toggle':'tooltip',
-            'data-bs-placement':'top',
-            'title':'Edit'
-        }
-    )
-
-    remove_button = Button(
-        display_text='',
-        name='remove-button',
-        icon='trash',
-        style='danger',
-        attributes={
-            'data-bs-toggle':'tooltip',
-            'data-bs-placement':'top',
-            'title':'Remove'
-        }
-    )
-
-    previous_button = Button(
-        display_text='Previous',
-        name='previous-button',
-        attributes={
-            'data-bs-toggle':'tooltip',
-            'data-bs-placement':'top',
-            'title':'Previous'
-        }
-    )
-
-    next_button = Button(
-        display_text='Next',
-        name='next-button',
-        attributes={
-            'data-bs-toggle':'tooltip',
-            'data-bs-placement':'top',
-            'title':'Next'
-        }
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Show All Jobs'
+        },
+        href=reverse('dask_tutorial:jobs_table')
     )
 
     context = {
-        'save_button': save_button,
-        'edit_button': edit_button,
-        'remove_button': remove_button,
-        'previous_button': previous_button,
-        'next_button': next_button
+        'jobs_button': jobs_button
     }
 
     return render(request, 'dask_tutorial/home.html', context)
+
+
+@controller
+def jobs_table(request):
+    # Use job manager to get all the jobs.
+    jobs = job_manager.list_jobs(order_by='-id', filters=None)
+
+    # Table View
+    jobs_table_options = JobsTable(
+        jobs=jobs,
+        column_fields=('id', 'name', 'description', 'creation_time'),
+        hover=True,
+        striped=False,
+        bordered=False,
+        condensed=False,
+        actions=['logs', 'delete'],
+        results_url='dask_tutorial:result',
+        refresh_interval=1000,
+        show_detailed_status=True,
+    )
+
+    home_button = Button(
+        display_text='Home',
+        name='home_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Home'
+        },
+        href=reverse('dask_tutorial:home')
+    )
+
+    context = {'jobs_table': jobs_table_options, 'home_button': home_button}
+
+    return render(request, 'dask_tutorial/jobs_table.html', context)
+
+
+@controller
+def result(request, job_id):
+    # Use job manager to get the given job.
+    job = job_manager.get_job(job_id=job_id)
+
+    # Get result and name
+    job_result = job.result
+    name = job.name
+
+    home_button = Button(
+        display_text='Home',
+        name='home_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Home'
+        },
+        href=reverse('dask_tutorial:home')
+    )
+
+    jobs_button = Button(
+        display_text='Show All Jobs',
+        name='dask_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Show All Jobs'
+        },
+        href=reverse('dask_tutorial:jobs_table')
+    )
+
+    context = {
+        'result': job_result,
+        'name': name,
+        'home_button': home_button,
+        'jobs_button': jobs_button
+    }
+
+    return render(request, 'dask_tutorial/results.html', context)
+
+
+@controller
+def error_message(request):
+    messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
+    return redirect(reverse('dask_tutorial:home'))
