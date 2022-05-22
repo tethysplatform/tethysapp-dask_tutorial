@@ -11,7 +11,7 @@ class DaskTutorial(TethysAppBase):
     description = ''
     package = 'dask_tutorial'  # WARNING: Do not change this value
     index = 'home'
-    icon = f'{package}/images/dask-logo.png'
+    icon = f'{package}/images/icon.gif'
     root_url = 'dask-tutorial'
     color = '#CA4D34'
     tags = ''
