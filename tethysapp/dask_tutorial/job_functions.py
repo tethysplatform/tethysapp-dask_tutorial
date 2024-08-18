@@ -1,21 +1,17 @@
 import time
 import dask
 
-
 def inc(x):
     time.sleep(3)
     return x + 1
-
 
 def double(x):
     time.sleep(3)
     return x + 2
 
-
 def add(x, y):
     time.sleep(10)
     return x + y
-
 
 def sum_up(x):
     time.sleep(5)
@@ -24,7 +20,6 @@ def sum_up(x):
 
 def convert_to_dollar_sign(result):
     return '$' + str(result)
-
 
 # Delayed Job
 def delayed_job():
@@ -36,7 +31,6 @@ def delayed_job():
         output.append(c)
     return dask.delayed(sum_up, pure=False)(output)
 
-
 # Distributed Job
 def distributed_job(client):
     output = []
@@ -46,7 +40,6 @@ def distributed_job(client):
         c = client.submit(add, a, b, pure=False)
         output.append(c)
     return client.submit(sum_up, output)
-
 
 # Multiple Leaf Distributed Job
 def multiple_leaf_job(client):
