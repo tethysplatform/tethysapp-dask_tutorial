@@ -1,7 +1,5 @@
-{% extends "dask_tutorial/base.html" %}
-{% load static tethys_gizmos %}
-
-{% load tethys_gizmos %}
+{% extends tethys_app.package|add:"/base.html" %}
+{% load static tethys %}
 
 {% block global_scripts %}
     {{ block.super }}

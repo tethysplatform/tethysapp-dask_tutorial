@@ -1,5 +1,5 @@
-{% extends "dask_tutorial/base.html" %}
-{% load tethys_gizmos %}
+{% extends tethys_app.package|add:"/base.html" %}
+{% load tethys %}
 
 {% block app_actions %}
 {% gizmo jobs_button %}
@@ -15,4 +15,3 @@
 <h2>Multi Leaf Distributed Job</h2>
 {% gizmo dask_multiple_leaf_button %}
 {% endblock %}
-
