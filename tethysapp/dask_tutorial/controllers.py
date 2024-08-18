@@ -1,15 +1,14 @@
 import random
-from django.shortcuts import render, reverse, redirect
 from tethys_sdk.routing import controller
 from django.http.response import HttpResponseRedirect
 from django.contrib import messages
 from tethys_sdk.gizmos import Button
 from tethys_sdk.gizmos import JobsTable
 from tethys_compute.models.dask.dask_job_exception import DaskJobException
-from tethysapp.dask_tutorial.app import DaskTutorial as app
+from .app import App
 
 # get job manager for the app
-job_manager = app.get_job_manager()
+job_manager = App.get_job_manager()
 
 
 @controller
@@ -26,14 +25,14 @@ def home(request):
             'data-bs-placement': 'top',
             'title': 'Show All Jobs'
         },
-        href=reverse('dask_tutorial:jobs_table')
+        href=App.reverse('jobs_table')
     )
 
     context = {
         'jobs_button': jobs_button
     }
 
-    return render(request, 'dask_tutorial/home.html', context)
+    return App.render(request, 'home.html', context)
 
 
 @controller
@@ -49,8 +48,7 @@ def jobs_table(request):
         striped=False,
         bordered=False,
         condensed=False,
-        actions=['logs', 'delete'],
-        results_url='dask_tutorial:result',
+        results_url=f'{App.package}:result',
         refresh_interval=1000,
         show_detailed_status=True,
     )
@@ -63,12 +61,12 @@ def jobs_table(request):
             'data-bs-placement': 'top',
             'title': 'Home'
         },
-        href=reverse('dask_tutorial:home')
+        href=App.reverse('home')
     )
 
     context = {'jobs_table': jobs_table_options, 'home_button': home_button}
 
-    return render(request, 'dask_tutorial/jobs_table.html', context)
+    return App.render(request, 'jobs_table.html', context)
 
 
 @controller
@@ -88,7 +86,7 @@ def result(request, job_id):
             'data-bs-placement': 'top',
             'title': 'Home'
         },
-        href=reverse('dask_tutorial:home')
+        href=App.reverse('home')
     )
 
     jobs_button = Button(
@@ -99,7 +97,7 @@ def result(request, job_id):
             'data-bs-placement': 'top',
             'title': 'Show All Jobs'
         },
-        href=reverse('dask_tutorial:jobs_table')
+        href=App.reverse('jobs_table')
     )
 
     context = {
@@ -109,10 +107,10 @@ def result(request, job_id):
         'jobs_button': jobs_button
     }
 
-    return render(request, 'dask_tutorial/results.html', context)
+    return App.render(request, 'results.html', context)
 
 
 @controller
 def error_message(request):
     messages.add_message(request, messages.ERROR, 'Invalid Scheduler!')
-    return redirect(reverse('dask_tutorial:home'))
+    return App.redirect(App.reverse('home'))

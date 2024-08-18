@@ -2,7 +2,7 @@ from tethys_sdk.base import TethysAppBase
 from tethys_sdk.app_settings import SchedulerSetting
 
 
-class DaskTutorial(TethysAppBase):
+class App(TethysAppBase):
     """
     Tethys app class for Dask Tutorial.
     """
@@ -13,7 +13,7 @@ class DaskTutorial(TethysAppBase):
     index = 'home'
     icon = f'{package}/images/dask-logo.png'
     root_url = 'dask-tutorial'
-    color = '#CA4D34'
+    color = '#c23616'
     tags = ''
     enable_feedback = False
     feedback_emails = []
