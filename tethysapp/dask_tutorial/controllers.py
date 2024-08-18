@@ -28,6 +28,17 @@ def home(request):
         href=App.reverse('run_job', kwargs={'job_type': 'delayed'})
     )
 
+    dask_distributed_button = Button(
+        display_text='Dask Distributed Job',
+        name='dask_distributed_button',
+        attributes={
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'top',
+            'title': 'Dask Future Job'
+        },
+        href=App.reverse('run_job', kwargs={'job_type': 'distributed'})
+    )
+
     jobs_button = Button(
         display_text='Show All Jobs',
         name='dask_button',
@@ -41,6 +52,7 @@ def home(request):
 
     context = {
         'dask_delayed_button': dask_delayed_button,
+        'dask_distributed_button': dask_distributed_button,
         'jobs_button': jobs_button
     }
 
@@ -149,5 +161,25 @@ def run_job(request, job_type):
 
         # Execute future
         dask.execute(delayed)
+
+    elif job_type.lower() == 'distributed':
+        from tethysapp.dask_tutorial.job_functions import distributed_job, convert_to_dollar_sign
+
+        # Get the client to create future
+        try:
+            client = scheduler.client
+        except DaskJobException:
+            return App.redirect(App.reverse('error_message'))
+
+        # Create future job instance
+        future = distributed_job(client)
+        dask = job_manager.create_job(
+            job_type='DASK',
+            name='dask_distributed',
+            user=request.user,
+            scheduler=scheduler,
+        )
+        dask.process_results_function = convert_to_dollar_sign
+        dask.execute(future)
 
     return HttpResponseRedirect(App.reverse('jobs_table'))

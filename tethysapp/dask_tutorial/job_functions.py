@@ -30,3 +30,13 @@ def delayed_job():
         c = dask.delayed(add, pure=False)(a, b)
         output.append(c)
     return dask.delayed(sum_up, pure=False)(output)
+
+# Distributed Job
+def distributed_job(client):
+    output = []
+    for x in range(3):
+        a = client.submit(inc, x, pure=False)
+        b = client.submit(double, x, pure=False)
+        c = client.submit(add, a, b, pure=False)
+        output.append(c)
+    return client.submit(sum_up, output)
